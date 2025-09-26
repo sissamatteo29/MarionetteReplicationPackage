@@ -1,6 +1,4 @@
-"""
-Requirements file for the experiment visualization application.
-"""
+# Requirements file for the experiment visualization application.
 
 matplotlib>=3.5.0
 numpy>=1.21.0
