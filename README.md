@@ -1,6 +1,6 @@
 # MARIONETTE: Automated A/B Testing Framework for Microservices
 
-![Marionette Banner](https://img.shields.io/badge/Marionette-A%2FB%20Testing%20Framework-blue?style=for-the-badge)
+![Marionette Banner](https://img.shields.io/badge/Marionette-A%2FB%2Fn%20Testing%20Framework-blue?style=for-the-badge)
 ![Platform](https://img.shields.io/badge/Platform-Kubernetes-orange?style=for-the-badge)
 
 Marionette, a framework enabling fine-grained runtime behavioural configuration in microservice architectures.
@@ -73,17 +73,6 @@ jq
 git
 ```
 
-#### Optional but Recommended
-
-```bash
-# For enhanced monitoring
-helm (v3.10+)
-
-# For development
-git
-vim/nano (text editor)
-```
-
 ### Kubernetes Cluster Setup
 
 The framework requires a Kubernetes cluster with specific addons:
@@ -138,56 +127,6 @@ chmod +x 06-scripts/*.sh
 minikube status
 ```
 
-## 📁 Project Structure
-
-```
-marionette-replication-package/
-│
-├── 01-outfit-app/                   # Target microservice application
-│   ├── common/                      # Shared libraries
-│   ├── services/                    # Individual microservices
-│   │   ├── ui-service/             # Web frontend service
-│   │   ├── imagestore-service/     # Image storage service
-│   │   ├── image-processor-service/ # Image processing service
-│   │   ├── *-marionette/           # Auto-generated A/B test variants
-│   │   └── k8s/                    # Kubernetes configurations
-│   └── build-deploy-outfit-app.sh  # Service deployment script
-│
-├── 02-marionette-tool/              # Code transformation engine
-│   └── marionette-tool-1.0.jar     # Pre-compiled transformation tool
-│
-├── 03-marionettist/                 # Control plane application
-│   ├── src/                        # Java source code
-│   ├── frontend/                   # React web interface
-│   ├── build-deploy-marionettist.sh # Control plane deployment
-│   └── marionette.xml              # A/B test configurations
-│
-├── 04-user-simulator/               # Load testing simulator
-│   ├── user_simulator.py           # Main simulation script
-│   ├── test-images/                # Sample test images
-│   └── README.md                   # Simulator documentation
-│
-├── 05-result-visualiser/            # Results analysis and visualization
-│   ├── main.py                     # Visualization generator
-│   ├── requirements.txt            # Python dependencies
-│   ├── venv/                       # Auto-created virtual environment
-│   ├── output/                     # Generated charts and reports
-│   └── *.py                        # Visualization modules
-│
-├── 06-scripts/                      # Automation utilities
-│   ├── monitor-logs.sh             # Log monitoring setup
-│   ├── open-browser.sh             # Cross-platform browser opener
-│   └── setup-visualizer.sh         # Python environment setup
-│
-├── results/                         # Generated test results
-│   └── ab_test_YYYYMMDD_HHMMSS/    # Timestamped result folders
-│
-├── build-deploy.sh                 # 🔧 Main deployment script
-├── start-ab-test.sh                # 🚀 A/B test execution script
-├── download-results.sh             # 📊 Results download and visualization
-└── README.md                       # This documentation
-```
-
 ## 📖 Usage Guide
 
 The framework follows a simple three-step workflow:
@@ -226,8 +165,6 @@ The framework follows a simple three-step workflow:
 - Builds all microservice variants using Marionette transformation tool
 - Compiles and containerizes services (outfit-app + marionette control plane)
 - Deploys services to Kubernetes with ingress configuration
-- Sets up monitoring stack (Prometheus + Grafana)
-- Discovers service endpoints automatically
 - Opens browser tabs for both applications
 
 **Usage**:
@@ -249,19 +186,18 @@ The framework follows a simple three-step workflow:
 ---
 
 #### `start-ab-test.sh` 🚀
-**Purpose**: Execute A/B tests with automated monitoring
+**Purpose**: Execute A/B/n tests with automated monitoring
 
 **What it does**:
-- Discovers both Marionette Control Plane and Outfit App endpoints
-- Tests connectivity to ensure services are ready
+
 - Creates a tmux session with 5 monitoring panes:
   - **Pane 1**: UI Service logs
   - **Pane 2**: Image Store Service logs  
   - **Pane 3**: Image Processor Service logs
-  - **Pane 4**: Marionette Control Plane logs
+  - **Pane 4**: Marionettist logs
   - **Pane 5**: User Simulator (load testing)
-- Sends HTTP requests to trigger test start and configuration changes
-- Provides real-time monitoring during test execution
+- Triggers test start on the Marionettist service (30 mins per configuration, 8 hours in total)
+- Triggers user simulation (3 users, cycle of 30 min)
 
 **Usage**:
 ```bash
@@ -285,28 +221,24 @@ tmux kill-session -t marionette-monitoring
 ---
 
 #### `download-results.sh` 📊
-**Purpose**: Download test results and generate comprehensive visualizations
+
+**Purpose**: Download test results and generate comprehensive visualizations. It should be used **after** the test has been completed with the `./start-ab-test.sh` script.
 
 **What it does**:
-- Automatically discovers Marionette Control Plane endpoint
-- Checks system dependencies (Python, jq, curl, etc.)
-- Downloads test results from `/api/downloadresult` endpoint
-- Creates timestamped results directory
-- **Automatically sets up Python virtual environment**
-- Installs visualization dependencies (matplotlib, seaborn, numpy)
+
+- Downloads last test results from the Marionettist service
+- Creates timestamped results directory under `results/`
+- Automatically sets up Python virtual environment
 - Generates 6 different visualization types:
-  1. **System Comparison**: Overall performance comparison
-  2. **Radar Chart**: Multi-dimensional performance view
-  3. **Individual Metrics**: Detailed metric-by-metric analysis
+  1. **System Comparison**: System-level comparison with multi-line chart
+  2. **Radar Chart**: Multi-dimensional performance view at the system-level
+  3. **Individual Metrics**: Metric-by-metric analysis
   4. **Service-Level Comparison**: Per-service performance breakdown
-  5. **Aggregate Metrics**: Combined performance values
+  5. **Aggregate Metrics**: Bar chart showing metrics values at the system-level
   6. **Configuration Overview**: Visual summary of test configurations
-- Opens all generated images automatically
-- Provides summary report with file locations
 
 **Usage**:
 ```bash
-# Basic usage (auto-discovers endpoint)
 ./download-results.sh
 ```
 
@@ -322,11 +254,6 @@ results/ab_test_YYYYMMDD_HHMMSS/
 └── radar_chart.png            # Multi-dimensional view
 ```
 
-**Self-Contained Features**:
-- Creates and manages its own Python virtual environment
-- Automatically installs required dependencies
-- Cross-platform image opening (Linux/macOS/Windows)
-- Comprehensive error handling and recovery
 
 ### Utility Scripts
 
@@ -349,59 +276,115 @@ Builds and deploys the Marionette control plane with React frontend.
 
 ## 📈 Results & Visualization
 
-### Visualization Types
+### Experiment Results
 
-The framework generates six comprehensive visualization types:
+After running a comprehensive 8-hour A/B/n test with **16 different system configurations** across all three microservices (Image Store, Image Processor, and UI Service), the following results were obtained. Each configuration was tested for 30 minutes with 3 concurrent users.
 
-1. **System Comparison** (`system_comparison.png`)
-   - Bar charts comparing overall system performance
-   - Shows all configurations side-by-side
-   - Highlights best and worst performing configurations
+### Behavioral Variants Tested
 
-2. **Radar Chart** (`radar_chart.png`)
-   - Multi-dimensional performance comparison
-   - All metrics normalized on same scale
-   - Easy identification of performance trade-offs
+| Service | Behavioral Aspect | Available Options |
+|---------|------------------|-------------------|
+| **Image Store** | Image compression | compression (default), no compression |
+| **Image Processor** | Enhancement algorithm | manual (default), ImageJ library |
+| **Image Processor** | Result caching | without cache (default), with cache |
+| **UI Service** | Interface complexity | beautiful UI (default), simple UI |
 
-3. **Individual Metrics** (`individual_metrics.png`)
-   - Detailed analysis of each performance metric
-   - Statistical summaries and rankings
-   - Best/worst configuration identification
+### Key Findings
 
-4. **Service-Level Comparison** (`service_level_comparison.png`)
-   - Per-service performance breakdown
-   - Identifies which services benefit from specific configurations
-   - Tabular and visual representation
+The experiment revealed several important insights about microservice performance optimization:
 
-5. **Aggregate Metrics** (`aggregate_metrics.png`)
-   - Combined performance values across all services
-   - Shows system-wide impact of configuration changes
-   - Clear ranking of configurations
 
-6. **Configuration Overview** (`configuration_overview.png`)
-   - Visual summary of what each configuration changes
-   - Maps configuration names to actual service behaviors
-   - Helps understand the relationship between configs and results
+![Configuration Overview](results-static/configuration_overview.png)
+
+The **top 3 configurations** all shared common characteristics:
+
+- ✅ **Image compression enabled** - consistently improves performance
+- ✅ **Simple UI interface** - reduces response time and CPU usage
+- ⚠️ **Cache implementation** showed unexpected trade-offs
+
+#### Counter-Intuitive Cache Results
+
+Surprisingly, the **best-performing configuration did not use caching**. Investigation revealed that the cache implementation uses thread-safe locks (`ReentrantReadWriteLock`) which creates bottlenecks:
+
+- Cache reduces image fetching but increases response time due to locking
+- Write operations block both other writes and reads
+- Thread contention negatively impacts performance under concurrent load
+
+### Visualization Analysis
+
+#### System-Level Performance Comparison
+
+![System Comparison](results-static/system_comparison.png)
+
+The system comparison chart shows performance differences across the top configurations, highlighting the trade-offs between response time and memory usage.
+
+#### Aggregate Metrics Analysis
+
+![Aggregate Metrics](results-static/aggregate_metrics.png)
+
+**Key observations:**
+
+- **Response Time**: Top configurations show similar P95 response times
+- **Memory Usage**: Significant differences due to caching strategy
+- **CPU Usage**: Cache implementation doubles CPU usage for Image Processor service
+
+#### Multi-Dimensional Performance View
+
+<img src="results-static/radar_chart.png" alt="Radar Chart" width="400">
+
+The radar chart provides a normalized view showing:
+
+- **Config-1**: Best response time, worst memory usage
+- **Config-2**: Best memory efficiency (uses cache), moderate response time  
+- **Config-3**: Balanced but overall lower performance
+
+#### Service-Level Breakdown
+
+![Service Level Comparison](results-static/service_level_comparison.png)
+
+Service-level analysis reveals:
+
+- **Image Processor**: Most critical service showing major performance variations
+- **Cache impact**: Memory usage more than halved when cache is enabled
+- **ImageJ library**: Better response time but higher memory consumption vs manual processing
+
+#### Individual Metrics Deep Dive
+
+![Individual Metrics](results-static/individual_metrics.png)
+
+Detailed metric analysis showing specific performance characteristics across all measured dimensions.
+
+### Experiment Conclusions
+
+1. **Definitive Wins**: Some optimizations consistently improve performance:
+   - Image compression should always be enabled
+   - Simple UI interface provides clear benefits
+
+2. **Trade-off Discoveries**: The cache implementation revealed important trade-offs:
+   - Reduces memory footprint significantly
+   - Increases response time due to locking overhead
+   - Doubles CPU usage in the Image Processor service
+
+3. **Fine-grained Insights**: Method-level A/B testing enabled discovery of:
+   - ImageJ library vs manual processing trade-offs
+   - Thread-safety bottlenecks in cache implementation
+   - Service-specific performance impacts
 
 ### Metrics Collected
 
 - **Response Time**: P95 response time in seconds
-- **Memory Usage**: JVM heap memory consumption in bytes
+- **Memory Usage**: JVM heap memory consumption in bytes  
 - **CPU Usage**: Process CPU utilization (0-1 ratio)
 
-### Results Analysis
 
-Each result set includes:
-- **Raw JSON data**: Complete test results with timestamps
-- **Performance rankings**: Configurations ranked by composite performance
-- **Statistical analysis**: Best/worst values with performance deltas
-- **Service-level insights**: Per-service performance breakdown
+
 
 ## 🔍 Troubleshooting
 
 ### Common Issues
 
 #### Minikube Issues
+
 ```bash
 # Minikube not running
 minikube start --cpus=4 --memory=8192
@@ -415,6 +398,7 @@ kubectl get ingress -n outfit-app
 ```
 
 #### Service Discovery Issues
+
 ```bash
 # Check service status
 kubectl get services -n outfit-app
@@ -429,6 +413,7 @@ curl -f http://$(minikube ip)
 ```
 
 #### Build Issues
+
 ```bash
 # Java version issues
 java -version  # Should be 17+
@@ -444,6 +429,7 @@ docker images
 ```
 
 #### Python Environment Issues
+
 ```bash
 # Python dependencies
 python3 --version  # Should be 3.8+
@@ -455,3 +441,7 @@ python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
