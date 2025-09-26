@@ -168,9 +168,9 @@ class SharedStats:
 class EnhancedOutfitSimulator:
     """Enhanced simulator that downloads images like a real browser."""
     
-    def __init__(self, images_folder="./test-images", cycle_duration=10, user_id=None, shared_stats=None, pool_manager=None):
-        # Hard-coded endpoints
-        self.base_url = "http://192.168.49.2"
+    def __init__(self, base_url="http://192.168.49.2", images_folder="./test-images", cycle_duration=10, user_id=None, shared_stats=None, pool_manager=None):
+        # Configurable endpoints
+        self.base_url = base_url.rstrip('/')  # Remove trailing slash if present
         self.upload_url = f"{self.base_url}/upload"
         self.gallery_url = f"{self.base_url}/"
         self.admin_clear_url = f"{self.base_url}/admin/clear-repository"
@@ -237,6 +237,7 @@ class EnhancedOutfitSimulator:
         
         user_prefix = f"[USER {self.user_id}] " if self.user_id is not None else ""
         print(f"🚀 {user_prefix}Enhanced Simulator Initialized")
+        print(f"   🌐 Base URL: {self.base_url}")
         print(f"   📁 Images folder: {self.images_folder}")
         print(f"   📄 Cycle duration: {self.cycle_duration} seconds")
         print(f"   ⏱️ Action interval: {self.action_interval} seconds")
@@ -655,6 +656,7 @@ class EnhancedOutfitSimulator:
                 user_threads = []
                 for i in range(num_users):
                     user_simulator = EnhancedOutfitSimulator(
+                        base_url=self.base_url,
                         images_folder=self.images_folder,
                         cycle_duration=self.cycle_duration,
                         user_id=i+1,
@@ -685,6 +687,7 @@ class EnhancedOutfitSimulator:
                 # Post
                 print(f"🧹 [PARENT] Post-cycle cleanup for cycle #{cycle_count + 1}")
                 post_cycle_simulator = EnhancedOutfitSimulator(
+                    base_url=self.base_url,
                     images_folder=self.images_folder,
                     cycle_duration=self.cycle_duration,
                     shared_stats=shared_stats,
@@ -717,6 +720,7 @@ class EnhancedOutfitSimulator:
             print("=" * 50)
             # Use shared stats for final printout
             final_simulator = EnhancedOutfitSimulator(
+                base_url=self.base_url,
                 images_folder=self.images_folder,
                 cycle_duration=self.cycle_duration,
                 shared_stats=shared_stats
@@ -787,6 +791,7 @@ def main():
         epilog="""
 Examples:
   python user_simulator.py
+  python user_simulator.py --base-url http://localhost:8080
   python user_simulator.py --images-folder ./my-images
   python user_simulator.py --cycle-duration 600 --max-cycles 3
   python user_simulator.py --num-users 5 --cycle-duration 300
@@ -795,6 +800,8 @@ Examples:
     )
     
     # Basic simulation options
+    parser.add_argument('--base-url', default='http://192.168.49.2',
+                       help='Base URL of the outfit application (default: http://192.168.49.2)')
     parser.add_argument('--images-folder', default='./test-images',
                        help='Folder containing test images (default: ./test-images)')
     parser.add_argument('--cycle-duration', type=int, default=10,
@@ -843,6 +850,7 @@ Examples:
     
     # Display configuration
     print(f"🔧 CONFIGURATION")
+    print(f"   Base URL: {args.base_url}")
     print(f"   Users: {args.num_users}")
     print(f"   Pool size: {pool_size}")
     print(f"   Max retries: {args.max_retries}")
@@ -859,6 +867,7 @@ Examples:
         )
         
         simulator = EnhancedOutfitSimulator(
+            base_url=args.base_url,
             images_folder=args.images_folder,
             cycle_duration=args.cycle_duration,
             pool_manager=pool_manager
@@ -872,6 +881,7 @@ Examples:
     else:
         # Multi-user mode (connection pool will be created inside)
         simulator = EnhancedOutfitSimulator(
+            base_url=args.base_url,
             images_folder=args.images_folder,
             cycle_duration=args.cycle_duration
         )

@@ -13,5 +13,5 @@ cd 01-outfit-app
 cd ..
 
 cd 03-marionettist
-build-deploy-marionettist.sh
+./build-deploy-marionettist.sh
 cd ..

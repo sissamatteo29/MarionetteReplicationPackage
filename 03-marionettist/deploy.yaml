@@ -156,8 +156,44 @@ metadata:
   name: marionette-control-plane
   namespace: outfit-app
 spec:
+  type: NodePort
   selector:
     app: marionette-control-plane
   ports:
   - port: 8080
     targetPort: 8080
+    nodePort: 30081  # Fixed NodePort for consistency
+---
+# Ingress for Marionette Control Plane
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: marionette-control-plane-ingress
+  namespace: outfit-app
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "30"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+spec:
+  rules:
+  - host: marionette.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: marionette-control-plane
+            port:
+              number: 8080
+  # Also respond to direct IP access
+  - http:
+      paths:
+      - path: /marionette
+        pathType: Prefix
+        backend:
+          service:
+            name: marionette-control-plane
+            port:
+              number: 8080
