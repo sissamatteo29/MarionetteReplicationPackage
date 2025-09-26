@@ -1,0 +1,163 @@
+---
+# ServiceAccount
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: marionette-control-plane-sa
+  namespace: outfit-app
+---
+# ClusterRole with permissions to read services in the namespace
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: marionette-control-plane-role
+rules:
+- apiGroups: [""]
+  resources: ["services", "endpoints", "pods"]
+  verbs: ["get", "list"]
+---
+# RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: marionette-control-plane-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: marionette-control-plane-role
+subjects:
+- kind: ServiceAccount
+  name: marionette-control-plane-sa
+  namespace: outfit-app
+---
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: marionette-control-plane
+  namespace: outfit-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: marionette-control-plane
+  template:
+    metadata:
+      labels:
+        app: marionette-control-plane
+    spec:
+      serviceAccountName: marionette-control-plane-sa
+      containers:
+      - name: marionette-control-plane
+        image: marionette-control-plane:latest
+        imagePullPolicy: Never  # For local development
+        ports:
+        - containerPort: 8080
+        env:
+        - name: KUBERNETES_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: TARGET_NAMESPACES
+          value: "frontend,backend,payment-service,outfit-app"  # Comma-separated list
+        - name: PROMETHEUS_URL
+          value: "http://prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090"
+        - name: MARIONETTE_METRICS_INCLUDED_SERVICES
+          value: "image-processor-service, ui-service"
+        
+        - name: MARIONETTE_METRICS_ENABLED
+          value: "true"
+        - name: MARIONETTE_METRICS_DEFAULT_TIME_RANGE_MINUTES
+          value: "15"
+        - name: MARIONETTE_METRICS_DEFAULT_STEP
+          value: "3s"
+        
+        # JVM Memory Metric
+        - name: MARIONETTE_METRICS_QUERIES_JVM_MEMORY_DISPLAYNAME
+          value: "JVM Heap Memory"
+        - name: MARIONETTE_METRICS_QUERIES_JVM_MEMORY_QUERY
+          value: "jvm_memory_used_bytes{job=~\".*{service}.*\",area=\"heap\"}"
+        - name: MARIONETTE_METRICS_QUERIES_JVM_MEMORY_UNIT
+          value: "bytes"
+        - name: MARIONETTE_METRICS_QUERIES_JVM_MEMORY_ENABLED
+          value: "true"
+        
+        # HTTP Requests (Spring Boot Actuator)
+        - name: MARIONETTE_METRICS_QUERIES_HTTP_REQUESTS_DISPLAYNAME
+          value: "HTTP Request Rate"
+        - name: MARIONETTE_METRICS_QUERIES_HTTP_REQUESTS_QUERY
+          value: "rate(http_server_requests_seconds_count{job=~\".*{service}.*\"}[1m])"
+        - name: MARIONETTE_METRICS_QUERIES_HTTP_REQUESTS_UNIT
+          value: "req/s"
+        - name: MARIONETTE_METRICS_QUERIES_HTTP_REQUESTS_ENABLED
+          value: "true"
+        
+        # New System CPU Usage Metric
+        - name: MARIONETTE_METRICS_QUERIES_SYSTEM_CPU_DISPLAYNAME
+          value: "System CPU Usage"
+        - name: MARIONETTE_METRICS_QUERIES_SYSTEM_CPU_QUERY
+          value: "system_cpu_usage{job=~\".*{service}.*\"} * 100"
+        - name: MARIONETTE_METRICS_QUERIES_SYSTEM_CPU_UNIT
+          value: "%"
+        - name: MARIONETTE_METRICS_QUERIES_SYSTEM_CPU_DESCRIPTION
+          value: "System CPU usage percentage"
+        - name: MARIONETTE_METRICS_QUERIES_SYSTEM_CPU_ENABLED
+          value: "true"
+
+
+
+        ########### NEW PROMETHEUS CONFIG FOR ABTESTING ############
+        # JVM Memory Metric - Aggregated heap usage across all pods
+        - name: MARIONETTE_METRICS_CONFIG_JVM_MEMORY_QUERY
+          value: "sum(jvm_memory_used_bytes{area=\"heap\",job=~\".*{service}.*\"}) or vector(0)"
+        - name: MARIONETTE_METRICS_CONFIG_JVM_MEMORY_ORDER
+          value: "2"
+        - name: MARIONETTE_METRICS_CONFIG_JVM_MEMORY_DIRECTION
+          value: "lower"
+        - name: MARIONETTE_METRICS_CONFIG_JVM_MEMORY_DISPLAYNAME
+          value: "JVM Heap Memory"
+        - name: MARIONETTE_METRICS_CONFIG_JVM_MEMORY_UNIT
+          value: "bytes"
+        - name: MARIONETTE_METRICS_CONFIG_JVM_MEMORY_DESCRIPTION
+          value: "Total heap memory used across all service instances"
+
+        # Response Time - P95 response time averaged across all instances
+        - name: MARIONETTE_METRICS_CONFIG_RESPONSE_TIME_QUERY
+          value: "avg(histogram_quantile(0.95, sum by (instance, le) (rate(http_server_requests_seconds_bucket{job=~\".*{service}.*\"}[{timespan}])))) or vector(0)"
+        - name: MARIONETTE_METRICS_CONFIG_RESPONSE_TIME_ORDER
+          value: "1"
+        - name: MARIONETTE_METRICS_CONFIG_RESPONSE_TIME_DIRECTION
+          value: "lower"
+        - name: MARIONETTE_METRICS_CONFIG_RESPONSE_TIME_DISPLAYNAME
+          value: "P95 Response Time"
+        - name: MARIONETTE_METRICS_CONFIG_RESPONSE_TIME_UNIT
+          value: "s"
+        - name: MARIONETTE_METRICS_CONFIG_RESPONSE_TIME_DESCRIPTION
+          value: "95th percentile response time averaged across all service instances"
+
+        # CPU Usage - Average CPU usage across all instances
+        - name: MARIONETTE_METRICS_CONFIG_CPU_USAGE_QUERY
+          value: "avg(process_cpu_usage{job=~\".*{service}.*\"}) or vector(0)"
+        - name: MARIONETTE_METRICS_CONFIG_CPU_USAGE_ORDER
+          value: "3"
+        - name: MARIONETTE_METRICS_CONFIG_CPU_USAGE_DIRECTION
+          value: "lower"
+        - name: MARIONETTE_METRICS_CONFIG_CPU_USAGE_DISPLAYNAME
+          value: "Process CPU Usage"
+        - name: MARIONETTE_METRICS_CONFIG_CPU_USAGE_UNIT
+          value: "(ratio 0-1)"
+        - name: MARIONETTE_METRICS_CONFIG_CPU_USAGE_DESCRIPTION
+          value: "Average CPU usage ratio across all service instances (0.0 to 1.0)"
+---
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: marionette-control-plane
+  namespace: outfit-app
+spec:
+  selector:
+    app: marionette-control-plane
+  ports:
+  - port: 8080
+    targetPort: 8080

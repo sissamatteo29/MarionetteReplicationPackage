@@ -1,0 +1,7 @@
+
+.vscode/
+frontend/node_modules/
+src/main/resources/static/
+**/target
+logs.txt
+tmp/

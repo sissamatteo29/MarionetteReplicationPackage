@@ -1,0 +1,36 @@
+
+<marionetteConfig>
+  <microserviceName>image-processor-marionette</microserviceName>
+  <srcRoot>src/main/java</srcRoot>
+  <injectCodeRoot>com/outfit/processor/__marionette</injectCodeRoot>
+
+  <marionetteClasses>
+
+    <marionetteClass>
+      <originalClass>
+        <path>com/outfit/processor/controllers/ImageProcessingController.java</path>
+        <behaviours>
+          <behaviour>
+            <name>processImageBytes</name>
+            <id>default</id>
+          </behaviour>
+        </behaviours>
+      </originalClass>
+
+      <variantClasses>
+
+        <variantClass>
+          <path>com/outfit/processor/controllers/marionette/ImageProcessingController_Marionette.java</path>
+          <behaviours>
+            <behaviour>
+              <name>processImageBytes</name>
+              <id>low_energy</id>
+            </behaviour>
+          </behaviours>
+        </variantClass>
+        
+      </variantClasses>
+    </marionetteClass>
+
+  </marionetteClasses>
+</marionetteConfig>
