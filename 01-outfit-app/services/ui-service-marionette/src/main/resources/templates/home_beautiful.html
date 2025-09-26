@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Outfit Gallery</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --accent-color: #ff6b6b;
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --card-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            --hover-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        * {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: var(--text-primary);
+        }
+
+        .hero-section {
+            background: var(--primary-gradient);
+            padding: 4rem 0;
+            margin: -2rem -15px 3rem -15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.05"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .hero-title {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 3.5rem;
+            color: white;
+            text-shadow: 2px 4px 8px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.2rem;
+            font-weight: 300;
+            margin-top: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .upload-section {
+            background: white;
+            border-radius: 25px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            margin: 2rem auto;
+            max-width: 500px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--secondary-gradient);
+        }
+
+        /* Toast notification styles */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1055;
+        }
+
+        .custom-toast {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .custom-toast.success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+        }
+
+        .custom-toast.error {
+            background: linear-gradient(135deg, #dc3545, #fd7e14);
+            color: white;
+        }
+
+        .custom-toast .toast-header {
+            background: transparent;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            color: inherit;
+        }
+
+        .custom-toast .toast-body {
+            background: transparent;
+            color: inherit;
+        }
+
+        .custom-toast .btn-close {
+            filter: brightness(0) invert(1);
+        }
+
+        .upload-title {
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            text-align: center;
+            font-size: 1.4rem;
+        }
+
+        .upload-zone {
+            border: 3px dashed #e0e6ed;
+            border-radius: 20px;
+            padding: 3rem 2rem;
+            text-align: center;
+            background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-zone:hover {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #f0f4ff 0%, #e8efff 100%);
+            transform: translateY(-2px);
+        }
+
+        .upload-zone.dragover {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #e8efff 0%, #dae4ff 100%);
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 2.5rem;
+            color: #667eea;
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+
+        .upload-text {
+            color: var(--text-primary);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-subtext {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-btn {
+            background: var(--primary-gradient);
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 25px;
+            color: white;
+            font-weight: 500;
+            margin-top: 1.5rem;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+            display: none;
+            font-size: 0.95rem;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+            background: linear-gradient(135deg, #5a6fd8 0%, #6b5b95 100%);
+        }
+
+        .file-preview {
+            display: none;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .file-name {
+            font-weight: 500;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .outfit-card {
+            border: none;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            transform: translateY(0);
+            background: white;
+            position: relative;
+        }
+
+        .outfit-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--secondary-gradient);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .outfit-card:hover::before {
+            opacity: 1;
+        }
+
+        .outfit-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .outfit-image {
+            height: 300px;
+            object-fit: cover;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .outfit-card:hover .outfit-image {
+            transform: scale(1.05);
+        }
+
+        .image-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(102, 126, 234, 0.8), rgba(118, 75, 162, 0.8));
+            opacity: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .outfit-card:hover .image-overlay {
+            opacity: 1;
+        }
+
+        .overlay-icon {
+            color: white;
+            font-size: 2rem;
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+
+        .outfit-card:hover .overlay-icon {
+            transform: scale(1);
+        }
+
+        .card-body-custom {
+            padding: 1.5rem;
+            background: white;
+        }
+
+        .outfit-filename {
+            font-weight: 500;
+            color: var(--text-primary);
+            margin: 0;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .outfit-filename::before {
+            content: '✨';
+            font-size: 1.1rem;
+        }
+
+        .pagination-container {
+            background: white;
+            border-radius: 50px;
+            padding: 1rem 2rem;
+            box-shadow: var(--card-shadow);
+            display: inline-flex;
+            gap: 1rem;
+            margin: 2rem auto;
+        }
+
+        .pagination-btn {
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 25px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pagination-btn:not(:disabled) {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .pagination-btn:not(:disabled):hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+        }
+
+        .pagination-btn:disabled {
+            background: #e9ecef;
+            color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .floating-stats {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 15px;
+            box-shadow: var(--card-shadow);
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            z-index: 1000;
+        }
+
+        .stats-icon {
+            color: var(--accent-color);
+            margin-right: 0.5rem;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .outfit-card {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .outfit-card:nth-child(1) { animation-delay: 0.1s; }
+        .outfit-card:nth-child(2) { animation-delay: 0.2s; }
+        .outfit-card:nth-child(3) { animation-delay: 0.3s; }
+        .outfit-card:nth-child(4) { animation-delay: 0.4s; }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .outfit-image {
+                height: 250px;
+            }
+            
+            .floating-stats {
+                position: static;
+                margin: 2rem auto;
+                text-align: center;
+            }
+
+            .upload-section {
+                margin: 2rem 1rem;
+                padding: 1.5rem;
+            }
+
+            .upload-zone {
+                padding: 1.25rem 0.75rem;
+            }
+        }
+
+        .loading-shimmer {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .upload-success {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            border-left-color: #28a745;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Toast Container -->
+    <div class="toast-container">
+        <div id="successToast" class="toast custom-toast success" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <i class="fas fa-check-circle me-2"></i>
+                <strong class="me-auto">Success</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                <span th:text="${successMessage}">Image uploaded successfully!</span>
+            </div>
+        </div>
+        
+        <div id="errorToast" class="toast custom-toast error" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong class="me-auto">Error</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                <span th:text="${errorMessage}">Failed to upload image. Please try again.</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="hero-section">
+        <div class="container text-center">
+            <h1 class="hero-title">Today's Outfits</h1>
+            <p class="hero-subtitle">Discover your perfect style, curated with love</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Upload Section -->
+        <div class="upload-section">
+            <h2 class="upload-title">
+                <i class="fas fa-plus-circle" style="color: #667eea; margin-right: 0.5rem;"></i>
+                Add Your Style
+            </h2>
+            
+            <form th:action="@{/upload}" method="post" enctype="multipart/form-data" id="uploadForm">
+                <div class="upload-zone" id="uploadZone">
+                    <div id="uploadContent">
+                        <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                        <div class="upload-text">Drop your outfit photo here</div>
+                        <div class="upload-subtext">or click to browse (JPG, PNG up to 10MB)</div>
+                    </div>
+                    <input type="file" name="file" class="file-input" id="fileInput" accept=".jpg,.jpeg,.png" required>
+                </div>
+                
+                <div class="file-preview" id="filePreview">
+                    <div class="file-name" id="fileName">
+                        <i class="fas fa-image" style="color: #667eea;"></i>
+                        <span></span>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <button type="submit" class="upload-btn" id="uploadBtn">
+                        <i class="fas fa-upload"></i> Upload Outfit
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Image Gallery -->
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-4 col-sm-6" th:each="img : ${images}">
+                <div class="card outfit-card">
+                    <div class="position-relative">
+                        <img th:src="${img.imageUrl}" class="card-img-top outfit-image" alt="Stylish outfit">
+                        <div class="image-overlay">
+                            <i class="fas fa-search-plus overlay-icon"></i>
+                        </div>
+                    </div>
+                    <div class="card-body card-body-custom">
+                        <p class="outfit-filename" th:text="${img.imageName}">Outfit Name</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="d-flex justify-content-center mt-5">
+            <div class="pagination-container">
+                <form th:action="@{/}" method="get" class="d-inline">
+                    <input type="hidden" name="page" th:value="${currentPage - 1}" />
+                    <button type="submit" class="pagination-btn" th:disabled="${currentPage == 0}">
+                        <i class="fas fa-chevron-left"></i>
+                        Previous
+                    </button>
+                </form>
+
+                <form th:action="@{/}" method="get" class="d-inline">
+                    <input type="hidden" name="page" th:value="${currentPage + 1}" />
+                    <button type="submit" class="pagination-btn" th:disabled="${!hasNextPage}">
+                        Next
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="floating-stats">
+        <i class="fas fa-images stats-icon"></i>
+        Fashion Gallery
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Upload functionality
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        const filePreview = document.getElementById('filePreview');
+        const fileName = document.getElementById('fileName');
+        const uploadBtn = document.getElementById('uploadBtn');
+
+        // Click to select file
+        uploadZone.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // Drag and drop functionality
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                handleFileSelect(files[0]);
+            }
+        });
+
+        // File selection handler
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+
+        function handleFileSelect(file) {
+            if (file) {
+                // Validate file type
+                const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+                if (!validTypes.includes(file.type)) {
+                    showErrorToast('Please select a valid image file (JPG, PNG)');
+                    return;
+                }
+
+                // Validate file size (10MB)
+                if (file.size > 10 * 1024 * 1024) {
+                    showErrorToast('File size must be less than 10MB');
+                    return;
+                }
+
+                // Show file preview
+                fileName.querySelector('span').textContent = file.name;
+                filePreview.style.display = 'block';
+                uploadBtn.style.display = 'inline-block';
+                
+                // Update upload zone content but preserve the file input
+                const uploadContent = uploadZone.querySelector('#uploadContent');
+                uploadContent.innerHTML = `
+                    <i class="fas fa-check-circle upload-icon" style="color: #28a745;"></i>
+                    <div class="upload-text" style="color: #28a745;">File selected successfully!</div>
+                    <div class="upload-subtext">Click to choose a different file</div>
+                `;
+            }
+        }
+
+        // Helper function to show error toast
+        function showErrorToast(message) {
+            const errorToastElement = document.getElementById('errorToast');
+            errorToastElement.querySelector('.toast-body span').textContent = message;
+            const errorToast = new bootstrap.Toast(errorToastElement);
+            errorToast.show();
+        }
+
+        // Form submission handler
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            const fileInput = document.getElementById('fileInput');
+            const button = document.getElementById('uploadBtn');
+            
+            // Check if a file is selected
+            if (!fileInput.files || fileInput.files.length === 0) {
+                e.preventDefault();
+                showErrorToast('Please select a file before uploading');
+                return;
+            }
+            
+            // Show loading state
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+            button.disabled = true;
+        });
+
+        // Toast notification handler
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check for success message
+            const successMessage = /*[[${successMessage}]]*/ null;
+            if (successMessage) {
+                const successToast = new bootstrap.Toast(document.getElementById('successToast'));
+                successToast.show();
+            }
+
+            // Check for error message
+            const errorMessage = /*[[${errorMessage}]]*/ null;
+            if (errorMessage) {
+                const errorToast = new bootstrap.Toast(document.getElementById('errorToast'));
+                errorToast.show();
+            }
+        });
+    </script>
+</body>
+
+</html>

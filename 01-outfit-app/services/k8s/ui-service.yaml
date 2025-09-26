@@ -1,0 +1,43 @@
+# ui-service.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ui-service
+  namespace: outfit-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ui-service
+  template:
+    metadata:
+      labels:
+        app: ui-service
+    spec:
+      containers:
+      - name: ui-service
+        image: ui-service:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8080
+        env:
+        - name: IMAGE_PROCESSOR_SERVICE_URL
+          value: "http://image-processor-service:8080"
+        - name: IMAGESTORE_SERVICE_URL
+          value: "http://imagestore-service:8080"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ui-service
+  namespace: outfit-app
+  labels:
+    monitored: "true"
+spec:
+  selector:
+    app: ui-service
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+  type: ClusterIP  # External access

@@ -1,0 +1,20 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: outfit-app-services
+  namespace: monitoring  # ServiceMonitor must be in the SAME namespace as Prometheus
+  labels:
+    release: prometheus  # This matches your Helm release name
+spec:
+  selector:
+    matchLabels:
+      # This label should be on ALL your services in outfit-app
+      monitored: "true"
+  namespaceSelector:
+    matchNames:
+    - outfit-app  # Look for services in this namespace
+  endpoints:
+  - port: http  # This must match the port NAME in your Service definition
+    interval: 30s
+    path: /actuator/prometheus  # Spring Actuator endpoint
+    scheme: http

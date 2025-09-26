@@ -1,0 +1,62 @@
+
+<marionetteConfig>
+  <microserviceName>image-processor-service</microserviceName>
+  <srcRoot>src/main/java</srcRoot>
+  <injectCodeRoot>com/outfit/processor/__marionette</injectCodeRoot>
+
+  <marionetteClasses>
+
+    <marionetteClass>
+      <originalClass>
+        <path>com/outfit/processor/usecases/inbound/processimage/ImageEnhanceProcessor.java</path>
+        <behaviours>
+          <behaviour>
+            <name>enhanceImage</name>
+            <id>manual</id>
+          </behaviour>
+        </behaviours>
+      </originalClass>
+
+      <variantClasses>
+
+        <variantClass>
+          <path>com/outfit/processor/usecases/inbound/processimage/marionette/ImageEnhanceProcessor_ImageJLibrary.java</path>
+          <behaviours>
+            <behaviour>
+              <name>enhanceImage</name>
+              <id>imageJLib</id>
+            </behaviour>
+          </behaviours>
+        </variantClass>
+
+      </variantClasses>
+    </marionetteClass>
+
+    <marionetteClass>
+      <originalClass>
+        <path>com/outfit/processor/usecases/inbound/processimage/ProcessImageUseCaseImpl.java</path>
+        <behaviours>
+          <behaviour>
+            <name>execute</name>
+            <id>without_cache</id>
+          </behaviour>
+        </behaviours>
+      </originalClass>
+
+      <variantClasses>
+
+        <variantClass>
+          <path>com/outfit/processor/usecases/inbound/processimage/marionette/ProcessImageUseCaseImpl_WithCache.java</path>
+          <behaviours>
+            <behaviour>
+              <name>execute</name>
+              <id>with_cache</id>
+            </behaviour>
+          </behaviours>
+        </variantClass>
+
+      </variantClasses>
+    </marionetteClass>
+
+  </marionetteClasses>
+</marionetteConfig>

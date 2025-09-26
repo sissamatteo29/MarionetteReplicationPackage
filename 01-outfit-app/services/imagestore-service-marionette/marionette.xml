@@ -1,0 +1,35 @@
+<marionetteConfig>
+  <microserviceName>imagestore-service</microserviceName>
+  <srcRoot>src/main/java</srcRoot>
+  <injectCodeRoot>com/outfit/imagestore/__marionette</injectCodeRoot>
+
+  <marionetteClasses>
+
+    <marionetteClass>
+      <originalClass>
+        <path>com/outfit/imagestore/adapters/outbound/imagerepo/ImageRepositoryAdapter.java</path>
+        <behaviours>
+          <behaviour>
+            <name>putImage</name>
+            <id>with_compression</id>
+          </behaviour>
+        </behaviours>
+      </originalClass>
+
+      <variantClasses>
+
+        <variantClass>
+          <path>com/outfit/imagestore/adapters/outbound/imagerepo/marionette/ImageRepositoryAdapter_NoCompression.java</path>
+          <behaviours>
+            <behaviour>
+              <name>putImage</name>
+              <id>without_compression</id>
+            </behaviour>
+          </behaviours>
+        </variantClass>
+
+      </variantClasses>
+    </marionetteClass>
+
+  </marionetteClasses>
+</marionetteConfig>

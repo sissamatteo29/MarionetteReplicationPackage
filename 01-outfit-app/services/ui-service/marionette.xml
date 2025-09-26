@@ -1,0 +1,35 @@
+<marionetteConfig>
+  <microserviceName>ui-service</microserviceName>
+  <srcRoot>src/main/java</srcRoot>
+  <injectCodeRoot>com/outfit/ui/__marionette</injectCodeRoot>
+
+  <marionetteClasses>
+
+    <marionetteClass>
+      <originalClass>
+        <path>com/outfit/ui/adapters/inbound/HomeController.java</path>
+        <behaviours>
+          <behaviour>
+            <name>home</name>
+            <id>beautiful_ui</id>
+          </behaviour>
+        </behaviours>
+      </originalClass>
+
+      <variantClasses>
+
+        <variantClass>
+          <path>com/outfit/ui/adapters/inbound/marionette/HomeController_SimplerUI.java</path>
+          <behaviours>
+            <behaviour>
+              <name>home</name>
+              <id>simple_ui</id>
+            </behaviour>
+          </behaviours>
+        </variantClass>
+
+      </variantClasses>
+    </marionetteClass>
+
+  </marionetteClasses>
+</marionetteConfig>

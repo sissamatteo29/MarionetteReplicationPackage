@@ -1,0 +1,46 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: outfit-app-ingress
+  namespace: outfit-app
+  annotations:
+    # Specify ingress controller
+    kubernetes.io/ingress.class: "nginx"
+    
+    # Performance optimizations for load testing
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "30"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"  # For image uploads
+    
+    # Connection optimizations
+    nginx.ingress.kubernetes.io/upstream-keepalive-connections: "32"
+    nginx.ingress.kubernetes.io/upstream-keepalive-requests: "100"
+    
+    # DO NOT include rewrite-target - it will break your app
+    
+spec:
+  rules:
+  # Main domain for your outfit app
+  - host: outfit-app.local
+    http:
+      paths:
+      # Only one route: everything goes to ui-service
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: ui-service
+            port:
+              number: 8080
+  
+  # Also respond to direct IP access (useful for testing)
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: ui-service
+            port:
+              number: 8080

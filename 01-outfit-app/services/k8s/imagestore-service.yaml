@@ -1,0 +1,69 @@
+# imagestore-service-persistent.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: imagestore-pvc
+  namespace: outfit-app
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi  
+  storageClassName: standard  
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: imagestore-service
+  namespace: outfit-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: imagestore-service
+  template:
+    metadata:
+      labels:
+        app: imagestore-service
+    spec:
+      containers:
+      - name: imagestore-service
+        image: imagestore-service:latest
+        imagePullPolicy: Never  # For local development
+        ports:
+        - containerPort: 8080
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "kubernetes"
+        - name: IMAGES_STORAGE_PATH
+          value: "/app/images"
+        - name: CACHE_STORAGE_PATH
+          value: "/app/cache"
+        volumeMounts:
+        - name: imagestore-storage
+          mountPath: /app/images
+        - name: cache-storage
+          mountPath: /app/cache
+      volumes:
+      - name: imagestore-storage
+        persistentVolumeClaim:
+          claimName: imagestore-pvc
+      - name: cache-storage
+        emptyDir: {}  # Cache can still be temporary
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: imagestore-service
+  namespace: outfit-app
+  labels:
+    monitored: "true"
+spec:
+  selector:
+    app: imagestore-service
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+  type: ClusterIP
