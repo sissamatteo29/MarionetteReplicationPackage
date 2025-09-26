@@ -1,0 +1,699 @@
+{
+  "metricConfigs": [
+    {
+      "metricName": "P95 Response Time",
+      "order": 1,
+      "unit": "s",
+      "direction": "lower"
+    },
+    {
+      "metricName": "JVM Heap Memory",
+      "order": 2,
+      "unit": "bytes",
+      "direction": "lower"
+    },
+    {
+      "metricName": "Process CPU Usage",
+      "order": 3,
+      "unit": "(ratio 0-1)",
+      "direction": "lower"
+    }
+  ],
+  "ranking": [
+    {
+      "position": 1,
+      "systemConfig": [
+        {
+          "serviceName": "image-processor-service",
+          "classConfigs": [
+            {
+              "className": "com/outfit/processor/usecases/inbound/processimage/ImageEnhanceProcessor.java",
+              "behaviours": [
+                {
+                  "methodName": "enhanceImage",
+                  "behaviourId": "imageJLib"
+                }
+              ]
+            },
+            {
+              "className": "com/outfit/processor/usecases/inbound/processimage/ProcessImageUseCaseImpl.java",
+              "behaviours": [
+                {
+                  "methodName": "execute",
+                  "behaviourId": "without_cache"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "serviceName": "ui-service",
+          "classConfigs": [
+            {
+              "className": "com/outfit/ui/adapters/inbound/HomeController.java",
+              "behaviours": [
+                {
+                  "methodName": "home",
+                  "behaviourId": "beautiful_ui"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "serviceName": "imagestore-service",
+          "classConfigs": [
+            {
+              "className": "com/outfit/imagestore/adapters/outbound/imagerepo/ImageRepositoryAdapter.java",
+              "behaviours": [
+                {
+                  "methodName": "putImage",
+                  "behaviourId": "with_compression"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "systemResults": [
+        {
+          "metricName": "P95 Response Time",
+          "value": 0.7339764129802848,
+          "unit": "s"
+        },
+        {
+          "metricName": "Process CPU Usage",
+          "value": 0.059260078141840984,
+          "unit": "(ratio 0-1)"
+        },
+        {
+          "metricName": "JVM Heap Memory",
+          "value": 222472872,
+          "unit": "bytes"
+        }
+      ],
+      "serviceResults": [
+        {
+          "serviceName": "image-processor-service",
+          "results": [
+            {
+              "metricName": "P95 Response Time",
+              "value": 0.08671553451432432,
+              "unit": "s"
+            },
+            {
+              "metricName": "JVM Heap Memory",
+              "value": 357619360,
+              "unit": "bytes"
+            },
+            {
+              "metricName": "Process CPU Usage",
+              "value": 0.02599748005039899,
+              "unit": "(ratio 0-1)"
+            }
+          ]
+        },
+        {
+          "serviceName": "ui-service",
+          "results": [
+            {
+              "metricName": "P95 Response Time",
+              "value": 1.0653023757,
+              "unit": "s"
+            },
+            {
+              "metricName": "JVM Heap Memory",
+              "value": 35093312,
+              "unit": "bytes"
+            },
+            {
+              "metricName": "Process CPU Usage",
+              "value": 0.002391742195367573,
+              "unit": "(ratio 0-1)"
+            }
+          ]
+        },
+        {
+          "serviceName": "imagestore-service",
+          "results": [
+            {
+              "metricName": "P95 Response Time",
+              "value": 1.0499113287265305,
+              "unit": "s"
+            },
+            {
+              "metricName": "JVM Heap Memory",
+              "value": 274705944,
+              "unit": "bytes"
+            },
+            {
+              "metricName": "Process CPU Usage",
+              "value": 0.1493910121797564,
+              "unit": "(ratio 0-1)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "position": 2,
+      "systemConfig": [
+        {
+          "serviceName": "image-processor-service",
+          "classConfigs": [
+            {
+              "className": "com/outfit/processor/usecases/inbound/processimage/ImageEnhanceProcessor.java",
+              "behaviours": [
+                {
+                  "methodName": "enhanceImage",
+                  "behaviourId": "imageJLib"
+                }
+              ]
+            },
+            {
+              "className": "com/outfit/processor/usecases/inbound/processimage/ProcessImageUseCaseImpl.java",
+              "behaviours": [
+                {
+                  "methodName": "execute",
+                  "behaviourId": "without_cache"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "serviceName": "ui-service",
+          "classConfigs": [
+            {
+              "className": "com/outfit/ui/adapters/inbound/HomeController.java",
+              "behaviours": [
+                {
+                  "methodName": "home",
+                  "behaviourId": "simple_ui"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "serviceName": "imagestore-service",
+          "classConfigs": [
+            {
+              "className": "com/outfit/imagestore/adapters/outbound/imagerepo/ImageRepositoryAdapter.java",
+              "behaviours": [
+                {
+                  "methodName": "putImage",
+                  "behaviourId": "with_compression"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "systemResults": [
+        {
+          "metricName": "P95 Response Time",
+          "value": 0.7344975858622124,
+          "unit": "s"
+        },
+        {
+          "metricName": "Process CPU Usage",
+          "value": 0.06253310117646908,
+          "unit": "(ratio 0-1)"
+        },
+        {
+          "metricName": "JVM Heap Memory",
+          "value": 179419466.66666666,  
+          "unit": "bytes"
+        }
+      ],
+      "serviceResults": [
+        {
+          "serviceName": "image-processor-service",
+          "results": [
+            {
+              "metricName": "P95 Response Time",
+              "value": 0.08662816232419354,
+              "unit": "s"
+            },
+            {
+              "metricName": "JVM Heap Memory",
+              "value": 266245312,
+              "unit": "bytes"
+            },
+            {
+              "metricName": "Process CPU Usage",
+              "value": 0.02070819506867728,
+              "unit": "(ratio 0-1)"
+            }
+          ]
+        },
+        {
+          "serviceName": "ui-service",
+          "results": [
+            {
+              "metricName": "P95 Response Time",
+              "value": 1.0675572814470589,
+              "unit": "s"
+            },
+            {
+              "metricName": "JVM Heap Memory",
+              "value": 63970560,
+              "unit": "bytes"
+            },
+            {
+              "metricName": "Process CPU Usage",
+              "value": 0.0012595515996305315,
+              "unit": "(ratio 0-1)"
+            }
+          ]
+        },
+        {
+          "serviceName": "imagestore-service",
+          "results": [
+            {
+              "metricName": "P95 Response Time",
+              "value": 1.0493073138153848,
+              "unit": "s"
+            },
+            {
+              "metricName": "JVM Heap Memory",
+              "value": 208042528,
+              "unit": "bytes"
+            },
+            {
+              "metricName": "Process CPU Usage",
+              "value": 0.16563155686109945,
+              "unit": "(ratio 0-1)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "position": 3,
+      "systemConfig": [
+        {
+          "serviceName": "image-processor-service",
+          "classConfigs": [
+            {
+              "className": "com/outfit/processor/usecases/inbound/processimage/ImageEnhanceProcessor.java",
+              "behaviours": [
+                {
+                  "methodName": "enhanceImage",
+                  "behaviourId": "manual"
+                }
+              ]
+            },
+            {
+              "className": "com/outfit/processor/usecases/inbound/processimage/ProcessImageUseCaseImpl.java",
+              "behaviours": [
+                {
+                  "methodName": "execute",
+                  "behaviourId": "without_cache"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "serviceName": "ui-service",
+          "classConfigs": [
+            {
+              "className": "com/outfit/ui/adapters/inbound/HomeController.java",
+              "behaviours": [
+                {
+                  "methodName": "home",
+                  "behaviourId": "beautiful_ui"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "serviceName": "imagestore-service",
+          "classConfigs": [
+            {
+              "className": "com/outfit/imagestore/adapters/outbound/imagerepo/ImageRepositoryAdapter.java",
+              "behaviours": [
+                {
+                  "methodName": "putImage",
+                  "behaviourId": "with_compression"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "systemResults": [
+        {
+          "metricName": "P95 Response Time",
+          "value": 0.7463474640492134,
+          "unit": "s"
+        },
+        {
+          "metricName": "Process CPU Usage",
+          "value": 0.0693611574182919,
+          "unit": "(ratio 0-1)"
+        },
+        {
+          "metricName": "JVM Heap Memory",
+          "value": 202718253.33333334,
+          "unit": "bytes"
+        }
+      ],
+      "serviceResults": [
+        {
+          "serviceName": "image-processor-service",
+          "results": [
+            {
+              "metricName": "P95 Response Time",
+              "value": 0.09816731673578946,
+              "unit": "s"
+            },
+            {
+              "metricName": "JVM Heap Memory",
+              "value": 370580864,
+              "unit": "bytes"
+            },
+            {
+              "metricName": "Process CPU Usage",
+              "value": 0.025861707040597842,
+              "unit": "(ratio 0-1)"
+            }
+          ]
+        },
+        {
+          "serviceName": "ui-service",
+          "results": [
+            {
+              "metricName": "P95 Response Time",
+              "value": 1.0824478387810814,
+              "unit": "s"
+            },
+            {
+              "metricName": "JVM Heap Memory",
+              "value": 41489888,
+              "unit": "bytes"
+            },
+            {
+              "metricName": "Process CPU Usage",
+              "value": 0.0027249098683658924,
+              "unit": "(ratio 0-1)"
+            }
+          ]
+        },
+        {
+          "serviceName": "imagestore-service",
+          "results": [
+            {
+              "metricName": "P95 Response Time",
+              "value": 1.0584272366307694,
+              "unit": "s"
+            },
+            {
+              "metricName": "JVM Heap Memory",
+              "value": 196084008,
+              "unit": "bytes"
+            },
+            {
+              "metricName": "Process CPU Usage",
+              "value": 0.17949685534591195,
+              "unit": "(ratio 0-1)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "position": 4,
+      "systemConfig": [
+        {
+          "serviceName": "image-processor-service",
+          "classConfigs": [
+            {
+              "className": "com/outfit/processor/usecases/inbound/processimage/ImageEnhanceProcessor.java",
+              "behaviours": [
+                {
+                  "methodName": "enhanceImage",
+                  "behaviourId": "manual"
+                }
+              ]
+            },
+            {
+              "className": "com/outfit/processor/usecases/inbound/processimage/ProcessImageUseCaseImpl.java",
+              "behaviours": [
+                {
+                  "methodName": "execute",
+                  "behaviourId": "without_cache"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "serviceName": "ui-service",
+          "classConfigs": [
+            {
+              "className": "com/outfit/ui/adapters/inbound/HomeController.java",
+              "behaviours": [
+                {
+                  "methodName": "home",
+                  "behaviourId": "simple_ui"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "serviceName": "imagestore-service",
+          "classConfigs": [
+            {
+              "className": "com/outfit/imagestore/adapters/outbound/imagerepo/ImageRepositoryAdapter.java",
+              "behaviours": [
+                {
+                  "methodName": "putImage",
+                  "behaviourId": "with_compression"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "systemResults": [
+        {
+          "metricName": "P95 Response Time",
+          "value": 0.7761877666471384,
+          "unit": "s"
+        },
+        {
+          "metricName": "Process CPU Usage",
+          "value": 0.056860697712459544,
+          "unit": "(ratio 0-1)"
+        },
+        {
+          "metricName": "JVM Heap Memory",
+          "value": 172473626.66666666,
+          "unit": "bytes"
+        }
+      ],
+      "serviceResults": [
+        {
+          "serviceName": "image-processor-service",
+          "results": [
+            {
+              "metricName": "P95 Response Time",
+              "value": 0.10573293243315213,
+              "unit": "s"
+            },
+            {
+              "metricName": "JVM Heap Memory",
+              "value": 185074896,
+              "unit": "bytes"
+            },
+            {
+              "metricName": "Process CPU Usage",
+              "value": 0.032585873855715125,
+              "unit": "(ratio 0-1)"
+            }
+          ]
+        },
+        {
+          "serviceName": "ui-service",
+          "results": [
+            {
+              "metricName": "P95 Response Time",
+              "value": 1.169444899528263,
+              "unit": "s"
+            },
+            {
+              "metricName": "JVM Heap Memory",
+              "value": 94858320,
+              "unit": "bytes"
+            },
+            {
+              "metricName": "Process CPU Usage",
+              "value": 0.0013442554085276203,
+              "unit": "(ratio 0-1)"
+            }
+          ]
+        },
+        {
+          "serviceName": "imagestore-service",
+          "results": [
+            {
+              "metricName": "P95 Response Time",
+              "value": 1.05338546798,
+              "unit": "s"
+            },
+            {
+              "metricName": "JVM Heap Memory",
+              "value": 237487664,
+              "unit": "bytes"
+            },
+            {
+              "metricName": "Process CPU Usage",
+              "value": 0.13665196387313588,
+              "unit": "(ratio 0-1)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "position": 5,
+      "systemConfig": [
+        {
+          "serviceName": "image-processor-service",
+          "classConfigs": [
+            {
+              "className": "com/outfit/processor/usecases/inbound/processimage/ImageEnhanceProcessor.java",
+              "behaviours": [
+                {
+                  "methodName": "enhanceImage",
+                  "behaviourId": "imageJLib"
+                }
+              ]
+            },
+            {
+              "className": "com/outfit/processor/usecases/inbound/processimage/ProcessImageUseCaseImpl.java",
+              "behaviours": [
+                {
+                  "methodName": "execute",
+                  "behaviourId": "with_cache"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "serviceName": "ui-service",
+          "classConfigs": [
+            {
+              "className": "com/outfit/ui/adapters/inbound/HomeController.java",
+              "behaviours": [
+                {
+                  "methodName": "home",
+                  "behaviourId": "beautiful_ui"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "serviceName": "imagestore-service",
+          "classConfigs": [
+            {
+              "className": "com/outfit/imagestore/adapters/outbound/imagerepo/ImageRepositoryAdapter.java",
+              "behaviours": [
+                {
+                  "methodName": "putImage",
+                  "behaviourId": "with_compression"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "systemResults": [
+        {
+          "metricName": "P95 Response Time",
+          "value": 0.8214963109768787,
+          "unit": "s"
+        },
+        {
+          "metricName": "Process CPU Usage",
+          "value": 0.05929965376775955,
+          "unit": "(ratio 0-1)"
+        },
+        {
+          "metricName": "JVM Heap Memory",
+          "value": 153593640,
+          "unit": "bytes"
+        }
+      ],
+      "serviceResults": [
+        {
+          "serviceName": "image-processor-service",
+          "results": [
+            {
+              "metricName": "P95 Response Time",
+              "value": 0.07290730523289474,
+              "unit": "s"
+            },
+            {
+              "metricName": "JVM Heap Memory",
+              "value": 297093560,
+              "unit": "bytes"
+            },
+            {
+              "metricName": "Process CPU Usage",
+              "value": 0.014737372465045976,
+              "unit": "(ratio 0-1)"
+            }
+          ]
+        },
+        {
+          "serviceName": "ui-service",
+          "results": [
+            {
+              "metricName": "P95 Response Time",
+              "value": 1.046578711571428,
+              "unit": "s"
+            },
+            {
+              "metricName": "JVM Heap Memory",
+              "value": 71846624,
+              "unit": "bytes"
+            },
+            {
+              "metricName": "Process CPU Usage",
+              "value": 0.00146910678307589,
+              "unit": "(ratio 0-1)"
+            }
+          ]
+        },
+        {
+          "serviceName": "imagestore-service",
+          "results": [
+            {
+              "metricName": "P95 Response Time",
+              "value": 1.345002916126313,
+              "unit": "s"
+            },
+            {
+              "metricName": "JVM Heap Memory",
+              "value": 91840736,
+              "unit": "bytes"
+            },
+            {
+              "metricName": "Process CPU Usage",
+              "value": 0.1616924820551568,
+              "unit": "(ratio 0-1)"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
