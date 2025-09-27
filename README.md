@@ -207,14 +207,18 @@ The framework follows a simple three-step workflow:
   - **Pane 3**: Attaches to the Image Processor Service of the *Outfit App* and shows logs
   - **Pane 4**: Attaches to the Marionettist Service of the *Outfit App* and shows logs
   - **Pane 5**: User Simulator (load testing)
-- Triggers test start on the Marionettist service: 30 mins per configuration, 8 hours in total
-- Triggers user simulation: 3 users, cycle of 30 min
+- Triggers test start on the Marionettist service: the default configuration is 30 mins per configuration, 8 hours in total to reproduce the experiment that generated the plots shown in the following of the document
+- Triggers user simulation: 3 users, cycle of 30 min (default adjusted to the test cycle)
 
 **Usage**:
 
 ```bash
 ./start-ab-test.sh
+
+./start-ab-test.sh 100 # Total test duration in seconds
 ```
+
+Note: it is possible to adjust the test duration by passing an integer to the script, which represents the total duration of the test in seconds. The default execution with no parameters reproduces the 8 hours long experiment that generated the plots illustrated in the Analysis section of this document.
 
 **Prerequisites**:
 
