@@ -21,10 +21,10 @@ It provides a non-intrusive approach to instrument microservices, allowing exter
 
 ## 🎯 Overview
 
-Marionette enables fine-grained instrumentation of microservices to define internally multiple behavioural variants and allow externalised control over them. It also provides an automated A/B/n testing pipeline designed to explore all the system-level combinations of behaviours and compare them. It enables researchers and developers to:
+Marionette enables fine-grained instrumentation of microservices. Developers define  multiple behavioural variants for methods and the framework takes care of automatically externalising control over them. It also provides an automated A/B/n testing pipeline designed to explore all the system-level combinations of behaviours and compare them. It enables researchers and developers to:
 
 - **Configure multiple behavioural variants** inside a microservice using XML-based configuration.
-- **Control the behaviour** of single microservices through a centralised service offering a graphical interface.
+- **Control the behaviour** of single microservices through a centralised service offering a graphical interface, called the Marionettist.
 - **Deploy and manage A/B/n tests** systematically exploring all system-level combinations of behaviours.
 - **Simulate user load** with a customizable script.
 - **Monitor real-time metrics** during test execution.
@@ -33,9 +33,9 @@ Marionette enables fine-grained instrumentation of microservices to define inter
 
 ### Components
 
-1. **Outfit App** (`01-outfit-app/`): Target microservice application for instrumentation of behaviuoral variants and A/B/n testing.
+1. **Outfit App** (`01-outfit-app/`): Target microservice application for instrumentation of behaviuoral variants and A/B/n testing. It is a sample application called *Outfit App* that offers a web interface with images of outfit ideas and allows users to upload their outfit choices. The folder contains the marinette-enabled versions of the plain microservices already (they end with "-marionette"). These instrumented versions have been obtained by executing the Marionette tool (second point of this list) on the non-instrumented versions. The non-instrumented versions offer an example of how to set up and configure a microservice to be transformed by the Marionette tool.
 2. **Marionette Tool** (`02-marionette-tool/`): Code transformation engine.
-3. **Control Plane** (`03-marionettist/`): Centralised control interface and test orchestration.
+3. **Marionettist Service** (`03-marionettist/`): Centralised control interface and test orchestration.
 4. **User Simulator** (`04-user-simulator/`): User load simulation tool.
 5. **Result Visualizer** (`05-result-visualiser/`): Automated chart generation from obtained results.
 6. **Automation Scripts** (`06-scripts/`): Helper utilities and browser automation.
@@ -78,6 +78,7 @@ git
 The framework requires a Kubernetes cluster with specific addons:
 
 #### Minikube Configuration
+
 ```bash
 # Start minikube with sufficient resources
 minikube start --cpus=4 --memory=8192 --disk-size=20g
@@ -89,6 +90,7 @@ minikube addons enable dashboard
 ```
 
 #### Required Kubernetes Features
+
 - **Ingress Controller**: NGINX ingress (enabled via minikube addon)
 - **Metrics Server**: For resource monitoring
 - **Persistent Volumes**: For data storage
@@ -97,12 +99,14 @@ minikube addons enable dashboard
 ## 🚀 Installation & Setup
 
 ### 1. Clone the Repository
+
 ```bash
 git clone https://github.com/sissamatteo29/MarionetteReplicationPackage.git
 cd MarionetteReplicationPackage
 ```
 
 ### 2. Verify Prerequisites
+
 ```bash
 # Check Kubernetes cluster
 kubectl cluster-info
@@ -118,6 +122,7 @@ python3 --version
 ```
 
 ### 3. Prepare the Environment
+
 ```bash
 # Make scripts executable
 chmod +x *.sh
@@ -132,52 +137,59 @@ minikube status
 The framework follows a simple three-step workflow:
 
 ### Step 1: Deploy the System
+
 ```bash
 ./build-deploy.sh
 ```
 
 ### Step 2: Run A/B Tests
+
 ```bash
 ./start-ab-test.sh
 ```
 
 ### Step 3: Download Results
+
 ```bash
 ./download-results.sh
 ```
 
 ### Detailed Workflow
 
-1. **Initial Deployment**: Sets up all services and opens browser tabs
-2. **Test Configuration**: Use the web interface to configure test parameters
-3. **Load Testing**: Automated user simulation with real-time monitoring
-4. **Results Analysis**: Automatic download and visualization generation
+1. **Initial Deployment**: Sets up all services and opens browser tabs.
+2. **Test execution**: Start the test cycle for the already instrumented version of the *Outfit App*. The test is configured to last for **8 hours** and explore the **16 system-level configurations** of the application, to reproduce the results illustrated in the following sections of this document.
+3. **Results Analysis**: Automatic download and plots generation.
 
 ## 🛠️ Scripts Reference
 
 ### Core Scripts
 
 #### `build-deploy.sh` 🔧
-**Purpose**: Complete system deployment and setup
+
+**Purpose**: Complete system deployment and setup.
 
 **What it does**:
-- Configures Minikube Docker environment
-- Builds all microservice variants using Marionette transformation tool
-- Compiles and containerizes services (outfit-app + marionette control plane)
-- Deploys services to Kubernetes with ingress configuration
-- Opens browser tabs for both applications
+
+- **Configures Minikube** Docker environment
+- **Builds** all microservice variants of the *Outfit App* using Marionette transformation tool
+- **Compiles** and containerizes services (*Outfit App* + Marionettist service)
+- **Deploys** all services to Kubernetes with ingress configuration
+- **Opens browser tabs** for both applications (first tab to access the Marionettist control plane, second tab for the *Outfit App* home page)
 
 **Usage**:
+
 ```bash
 ./build-deploy.sh
 ```
 
 **Prerequisites**:
+
 - Minikube running with ingress addon enabled
 - Docker environment available
 - Java 17+ and Maven installed
 
 **Output**:
+
 - All services deployed to `outfit-app` namespace
 - Two browser tabs opened:
   - Marionette Control Plane: `http://<minikube-ip>:30081`
@@ -186,18 +198,19 @@ The framework follows a simple three-step workflow:
 ---
 
 #### `start-ab-test.sh` 🚀
+
 **Purpose**: Execute A/B/n tests with automated monitoring
 
 **What it does**:
 
-- Creates a tmux session with 5 monitoring panes:
-  - **Pane 1**: UI Service logs
-  - **Pane 2**: Image Store Service logs  
-  - **Pane 3**: Image Processor Service logs
-  - **Pane 4**: Marionettist logs
+- Creates a tmux session with 5 monitoring panes to see test progresses:
+  - **Pane 1**: Attaches to the UI Service of the *Outfit App* and shows logs
+  - **Pane 2**: Attaches to the Image Store Service of the *Outfit App* and shows logs  
+  - **Pane 3**: Attaches to the Image Processor Service of the *Outfit App* and shows logs
+  - **Pane 4**: Attaches to the Marionettist Service of the *Outfit App* and shows logs
   - **Pane 5**: User Simulator (load testing)
-- Triggers test start on the Marionettist service (30 mins per configuration, 8 hours in total)
-- Triggers user simulation (3 users, cycle of 30 min)
+- Triggers test start on the Marionettist service: 30 mins per configuration, 8 hours in total
+- Triggers user simulation: 3 users, cycle of 30 min
 
 **Usage**:
 ```bash
@@ -228,7 +241,6 @@ tmux kill-session -t marionette-monitoring
 
 - Downloads last test results from the Marionettist service
 - Creates timestamped results directory under `results/`
-- Automatically sets up Python virtual environment
 - Generates 6 different visualization types:
   1. **System Comparison**: System-level comparison with multi-line chart
   2. **Radar Chart**: Multi-dimensional performance view at the system-level
@@ -245,10 +257,10 @@ tmux kill-session -t marionette-monitoring
 **Generated Files**:
 ```
 results/ab_test_YYYYMMDD_HHMMSS/
-├── test_results.json           # Raw test data
+├── test_results.json           # Raw test data from Marionettist
 ├── individual_metrics.png      # Performance by metric
-├── system_comparison.png       # Overall comparison
-├── aggregate_metrics.png       # Combined values
+├── system_comparison.png       # Overall comparison (multi-line)
+├── aggregate_metrics.png       # System-level Value Comparison (bar chart)
 ├── service_level_comparison.png # Per-service analysis
 ├── configuration_overview.png  # Configuration summary
 └── radar_chart.png            # Multi-dimensional view
