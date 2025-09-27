@@ -1,6 +1,20 @@
 
 #!/bin/bash
 
+# Parse command line arguments
+DURATION_SECONDS=${1:-28800}  # Default to 8 hours (28800 seconds) if no argument provided
+
+# Validate the duration parameter
+if ! [[ "$DURATION_SECONDS" =~ ^[0-9]+$ ]]; then
+    echo "Error: Duration must be a positive integer (seconds)"
+    echo "Usage: $0 [duration_in_seconds]"
+    echo "Example: $0 3600  # Run test for 1 hour"
+    echo "Default: 28800 seconds (8 hours)"
+    exit 1
+fi
+
+echo "🎯 Test duration set to: $DURATION_SECONDS seconds ($(($DURATION_SECONDS / 3600)) hours, $(($DURATION_SECONDS % 3600 / 60)) minutes)"
+
 # Trap to handle script interruption
 cleanup_on_exit() {
     echo "Script interrupted, cleaning up..."
@@ -126,15 +140,15 @@ fi
 
 echo "Proceeding with discovered endpoints..."
 
-# Send the web request to start the test for 8 hours (fire-and-forget)
-echo "Starting AB test for 8 hours (28800 seconds)..."
+# Send the web request to start the test (fire-and-forget)
+echo "Starting AB test for $DURATION_SECONDS seconds..."
 
 # Create a fire-and-forget curl request with very short timeout for initial response
 echo "Sending AB test start request (fire-and-forget mode)..."
 
 # Use nohup and background execution with timeout to prevent hanging
 (
-    timeout 10 curl -X POST "$MARIONETTE_URL/api/services/start-ab-test?durationSeconds=28800" \
+    timeout 10 curl -X POST "$MARIONETTE_URL/api/services/start-ab-test?durationSeconds=$DURATION_SECONDS" \
         --connect-timeout 5 \
         --max-time 10 \
         --silent \
@@ -164,7 +178,8 @@ if ! command -v tmux &> /dev/null; then
     echo "⚠ tmux is not installed. Install it with: sudo apt install tmux"
     echo "Running user simulator in foreground instead..."
     cd 04-user-simulator
-    python3 user_simulator.py --base-url "$OUTFIT_APP_URL" --num-users 3 --cycle-duration 1800
+    CYCLE_DURATION=$((DURATION_SECONDS / 16))
+    python3 user_simulator.py --base-url "$OUTFIT_APP_URL" --num-users 3 --cycle-duration $CYCLE_DURATION
     exit 0
 fi
 
@@ -208,7 +223,8 @@ tmux send-keys -t marionette-monitoring:monitoring.2 'echo "=== IMAGESTORE SERVI
 tmux send-keys -t marionette-monitoring:monitoring.3 'echo "=== IMAGE PROCESSOR SERVICE LOGS ===" && kubectl logs -f deployments/image-processor-service -n outfit-app' Enter
 
 # Pane 4 (bottom-right): user simulator
-tmux send-keys -t marionette-monitoring:monitoring.4 "echo \"=== USER SIMULATOR ===\" && cd 04-user-simulator && python3 user_simulator.py --base-url $OUTFIT_APP_URL --num-users 3 --cycle-duration 1800" Enter
+CYCLE_DURATION=$((DURATION_SECONDS / 16))
+tmux send-keys -t marionette-monitoring:monitoring.4 "echo \"=== USER SIMULATOR ===\" && cd 04-user-simulator && python3 user_simulator.py --base-url $OUTFIT_APP_URL --num-users 3 --cycle-duration $CYCLE_DURATION" Enter
 
 # Cleanup: kill port-forward if it was used
 if [ ! -z "$PORT_FORWARD_PID" ]; then
