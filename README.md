@@ -1,4 +1,4 @@
-# MARIONETTE: Automated A/B Testing Framework for Microservices
+# Marionette: Runtime Behavioural Configuration and A/B/n Testing in Microservice Systems
 
 ![Marionette Banner](https://img.shields.io/badge/Marionette-A%2FB%2Fn%20Testing%20Framework-blue?style=for-the-badge)
 ![Platform](https://img.shields.io/badge/Platform-Kubernetes-orange?style=for-the-badge)
@@ -9,10 +9,8 @@ It provides a non-intrusive approach to instrument microservices, allowing exter
 ## 📋 Table of Contents
 
 - [Overview](#-overview)
-- [Architecture](#️-architecture)
 - [Prerequisites](#-prerequisites)
 - [Installation & Setup](#-installation--setup)
-- [Project Structure](#-project-structure)
 - [Usage Guide](#-usage-guide)
 - [Scripts Reference](#️-scripts-reference)
 - [Results & Visualization](#-results--visualization)
@@ -213,16 +211,19 @@ The framework follows a simple three-step workflow:
 - Triggers user simulation: 3 users, cycle of 30 min
 
 **Usage**:
+
 ```bash
 ./start-ab-test.sh
 ```
 
 **Prerequisites**:
+
 - Services deployed via `build-deploy.sh`
 - tmux installed
 - Both Marionette and Outfit App endpoints accessible
 
 **Session Management**:
+
 ```bash
 # Attach to existing session
 tmux attach-session -t marionette-monitoring
@@ -250,12 +251,14 @@ tmux kill-session -t marionette-monitoring
   6. **Configuration Overview**: Visual summary of test configurations
 
 **Usage**:
+
 ```bash
 ./download-results.sh
 ```
 
 **Generated Files**:
-```
+
+```bash
 results/ab_test_YYYYMMDD_HHMMSS/
 ├── test_results.json           # Raw test data from Marionettist
 ├── individual_metrics.png      # Performance by metric
@@ -266,24 +269,28 @@ results/ab_test_YYYYMMDD_HHMMSS/
 └── radar_chart.png            # Multi-dimensional view
 ```
 
-
 ### Utility Scripts
 
 #### `06-scripts/monitor-logs.sh`
+
 Sets up log monitoring in tmux panes for real-time debugging.
 
 #### `06-scripts/open-browser.sh`
+
 Cross-platform browser opening utility that works on Linux, macOS, and Windows.
 
 #### `06-scripts/setup-visualizer.sh`
+
 Manual Python environment setup script (optional, as `download-results.sh` handles this automatically).
 
 ### Service-Specific Scripts
 
 #### `01-outfit-app/build-deploy-outfit-app.sh`
+
 Builds and deploys the target microservice application with A/B test variants.
 
 #### `03-marionettist/build-deploy-marionettist.sh`
+
 Builds and deploys the Marionette control plane with React frontend.
 
 ## 📈 Results & Visualization
@@ -291,6 +298,7 @@ Builds and deploys the Marionette control plane with React frontend.
 ### Experiment Results
 
 After running a comprehensive 8-hour A/B/n test with **16 different system configurations** across all three microservices (Image Store, Image Processor, and UI Service), the following results were obtained. Each configuration was tested for 30 minutes with 3 concurrent users.
+The default setup of this replication package performs exactly the same test, with the same duration and system configuration.
 
 ### Behavioral Variants Tested
 
@@ -301,12 +309,17 @@ After running a comprehensive 8-hour A/B/n test with **16 different system confi
 | **Image Processor** | Result caching | without cache (default), with cache |
 | **UI Service** | Interface complexity | beautiful UI (default), simple UI |
 
+### Metrics Collected
+
+- **Response Time**: P95 response time in seconds
+- **Memory Usage**: JVM heap memory consumption in bytes  
+- **CPU Usage**: Process CPU utilization (0-1 ratio)
+
 ### Key Findings
 
 The experiment revealed several important insights about microservice performance optimization:
 
-
-![Configuration Overview](results-static/configuration_overview.png)
+<img src="results-static/configuration_overview.png" alt="Radar Chart" width="600">
 
 The **top 3 configurations** all shared common characteristics:
 
@@ -326,23 +339,18 @@ Surprisingly, the **best-performing configuration did not use caching**. Investi
 
 #### System-Level Performance Comparison
 
-![System Comparison](results-static/system_comparison.png)
+<img src="results-static/system_comparison.png" alt="Radar Chart" width="600">
 
 The system comparison chart shows performance differences across the top configurations, highlighting the trade-offs between response time and memory usage.
 
-#### Aggregate Metrics Analysis
+The displayed values are normalized to enable comparison across different types of metrics, which can have vastly different scales and units, so direct comparison would be meaningless.
+The normalization process involves two steps. First, min-max scaling allows for rescaling each metric to a range between 0 and 1. Secondly, direction alignment is applied. Since some metrics are *better* when lower (response time, memory usage) and others when higher (availability), all metrics are aligned so that higher normalized values consistently represent better performance. For metrics where lower values are preferable, the normalized values are inverted using: $$ aligned\_value = 1 - normalized\_value$$
 
-![Aggregate Metrics](results-static/aggregate_metrics.png)
-
-**Key observations:**
-
-- **Response Time**: Top configurations show similar P95 response times
-- **Memory Usage**: Significant differences due to caching strategy
-- **CPU Usage**: Cache implementation doubles CPU usage for Image Processor service
+As a result, **values closer to 1.0 indicate better performance**, while values closer to 0.0 indicate worse performance, regardless of the original metric type.
 
 #### Multi-Dimensional Performance View
 
-<img src="results-static/radar_chart.png" alt="Radar Chart" width="400">
+<img src="results-static/radar_chart.png" alt="Radar Chart" width="500">
 
 The radar chart provides a normalized view showing:
 
@@ -350,21 +358,37 @@ The radar chart provides a normalized view showing:
 - **Config-2**: Best memory efficiency (uses cache), moderate response time  
 - **Config-3**: Balanced but overall lower performance
 
-#### Service-Level Breakdown
+The normalisation steps applied are the same described for the multi-line chart.
 
-![Service Level Comparison](results-static/service_level_comparison.png)
 
-Service-level analysis reveals:
+#### Aggregate Metrics Analysis
 
-- **Image Processor**: Most critical service showing major performance variations
-- **Cache impact**: Memory usage more than halved when cache is enabled
-- **ImageJ library**: Better response time but higher memory consumption vs manual processing
+![Aggregate Metrics](results-static/aggregate_metrics.png)
+
+This plot offers a system-level comparison in which it is possible to see the actual values of the observed metrics. 
+
+**Key observations:**
+
+- **Response Time**: Top configurations show similar P95 response times
+- **Memory Usage**: Significant differences due to caching strategy
+- **CPU Usage**: Cache implementation doubles CPU usage for Image Processor service
 
 #### Individual Metrics Deep Dive
 
 ![Individual Metrics](results-static/individual_metrics.png)
 
-Detailed metric analysis showing specific performance characteristics across all measured dimensions.
+Detailed metric analysis showing specific performance characteristics across all measured dimensions. This plot allows to zoom in to see the relative difference of metrics values at the system level.
+
+#### Service-Level Breakdown
+
+![Service Level Comparison](results-static/service_level_comparison.png)
+
+There is a separate sub-plot for each metric. On the x-axis, the services composing the *Outfit App* are listed. Different bar colours correspond to different system-level configurations under test.
+Service-level analysis reveals:
+
+- **Image Processor**: Most critical service showing major performance variations
+- **Cache impact**: Memory usage more than halved when cache is enabled, but no great improvement on overall response time.
+- **ImageJ library**: Better response time but higher memory consumption vs manual processing
 
 ### Experiment Conclusions
 
@@ -381,15 +405,6 @@ Detailed metric analysis showing specific performance characteristics across all
    - ImageJ library vs manual processing trade-offs
    - Thread-safety bottlenecks in cache implementation
    - Service-specific performance impacts
-
-### Metrics Collected
-
-- **Response Time**: P95 response time in seconds
-- **Memory Usage**: JVM heap memory consumption in bytes  
-- **CPU Usage**: Process CPU utilization (0-1 ratio)
-
-
-
 
 ## 🔍 Troubleshooting
 
